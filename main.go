@@ -17,8 +17,8 @@ type Key struct {
 	Target      string `json:"target"`
 }
 
-// ArticleSearch represents a single article search api query
-type ArticleSearch struct {
+// ArticleSearchQuery represents a single article search api query
+type ArticleSearchQuery struct {
 	Query       string
 	FilterQuery string
 	BeginDate   string
@@ -38,22 +38,41 @@ type ArticleSearchResult struct {
 	Response  ArticleSearchResponse `json:"response"`
 }
 
-// ArticleSearchMetaData is the meta data tag for each Article Search response
-type ArticleSearchMetaData struct {
+// ArticleSearchResultMeta is the meta data tag for each Article Search response
+type ArticleSearchResultMeta struct {
 	Hits   int `json:"hits"`
 	Offset int `json:"offset"`
 	Time   int `json:"time"`
 }
 
-// ArticleSearchDoc is a single document from the Article Search response
-type ArticleSearchDoc struct {
-	URL string `json:"web_url"`
+// ArticleSearchResultMedia represents a single multimedia item for a doc
+type ArticleSearchResultMedia struct {
+	URL  string `json:"url"`
+	Type string `json:"type"`
+}
+
+// ArticleSearchResultHeadline represents the headline for the result doc
+type ArticleSearchResultHeadline struct {
+	Main          string `json:"main"`
+	Kicker        string `json:"kicker"`
+	ContentKicker string `json:"content_kicker"`
+	PrintHeadline string `json:"print_headline"`
+}
+
+// ArticleSearchResultDoc is a single document from the Article Search response
+type ArticleSearchResultDoc struct {
+	URL        string                      `json:"web_url"`
+	Snippet    string                      `json:"snippet"`
+	PrintPage  string                      `json:"print_page"`
+	Source     string                      `json:"source"`
+	Multimedia []ArticleSearchResultMedia  `json:"multimedia"`
+	Headline   ArticleSearchResultHeadline `json:"headline"`
 }
 
 // ArticleSearchResponse is the main data body of the Article Search response
 type ArticleSearchResponse struct {
-	Meta ArticleSearchMetaData `json:"meta"`
-	Docs []ArticleSearchDoc    `json:"docs"`
+	Meta ArticleSearchResultMeta  `json:"meta"`
+	Docs []ArticleSearchResultDoc `json:"docs"`
 }
 
 func main() {
@@ -78,7 +97,7 @@ func main() {
 	fmt.Println("keyArticleSearch:", articleSearch.Target)
 	fmt.Println("keyArticleSearch:", articleSearch.Value)
 
-	queryArticleSearch := ArticleSearch{
+	queryArticleSearch := ArticleSearchQuery{
 		Query:       "trump",
 		FilterQuery: "",
 		BeginDate:   "",
@@ -115,7 +134,7 @@ func main() {
 	}
 }
 
-func makeQueryArticleSearch(key Key, query ArticleSearch) (*http.Response, error) {
+func makeQueryArticleSearch(key Key, query ArticleSearchQuery) (*http.Response, error) {
 	var buffer bytes.Buffer
 	buffer.WriteString(key.Target)
 	buffer.WriteString("?api-key=")
