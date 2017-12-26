@@ -159,10 +159,19 @@ func main() {
 		}
 
 		articleSearchResult, err := getArticles(body)
-		fmt.Println(*articleSearchResult)
+		for i, doc := range articleSearchResult.Response.Docs {
+			printDoc(i, doc)
+		}
 	} else {
 		fmt.Println("Unsuccessful request to Article Search")
 	}
+}
+
+func printDoc(index int, doc Doc) {
+	utilities.ColorPrintln(fmt.Sprintf("News Article %v", index), "cyan")
+	utilities.ColorPrintln(doc.URL, "magenta")
+	utilities.ColorPrintln(doc.Snippet, "yellow")
+	utilities.ColorPrintln("-------------\n-------------", "red")
 }
 
 func makeQueryArticleSearch(key Key, query Query) (*http.Response, error) {

@@ -1,3 +1,8 @@
+### News APIs used
+
+* https://developer.nytimes.com/
+
+
 ### Structure of config.json
 
 ```
