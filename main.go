@@ -33,8 +33,27 @@ type ArticleSearch struct {
 
 // ArticleSearchResult represents a article search api query result
 type ArticleSearchResult struct {
-	Status    string `json:"status"`
-	Copyright string `json:"copyright"`
+	Status    string                `json:"status"`
+	Copyright string                `json:"copyright"`
+	Response  ArticleSearchResponse `json:"response"`
+}
+
+// ArticleSearchMetaData is the meta data tag for each Article Search response
+type ArticleSearchMetaData struct {
+	Hits   int `json:"hits"`
+	Offset int `json:"offset"`
+	Time   int `json:"time"`
+}
+
+// ArticleSearchDoc is a single document from the Article Search response
+type ArticleSearchDoc struct {
+	URL string `json:"web_url"`
+}
+
+// ArticleSearchResponse is the main data body of the Article Search response
+type ArticleSearchResponse struct {
+	Meta ArticleSearchMetaData `json:"meta"`
+	Docs []ArticleSearchDoc    `json:"docs"`
 }
 
 func main() {
