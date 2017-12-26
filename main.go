@@ -1,8 +1,10 @@
+// namespace declaration
 package main
 
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -17,8 +19,8 @@ type Key struct {
 	Target      string `json:"target"`
 }
 
-// ArticleSearchQuery represents a single article search api query
-type ArticleSearchQuery struct {
+// Query represents a single article search api query
+type Query struct {
 	Query       string
 	FilterQuery string
 	BeginDate   string
@@ -31,51 +33,65 @@ type ArticleSearchQuery struct {
 	FacetFilter bool
 }
 
-// ArticleSearchResult represents a article search api query result
-type ArticleSearchResult struct {
+// SearchResult represents a article search api query result
+type SearchResult struct {
 	Status    string                `json:"status"`
 	Copyright string                `json:"copyright"`
 	Response  ArticleSearchResponse `json:"response"`
 }
 
-// ArticleSearchResultMeta is the meta data tag for each Article Search response
-type ArticleSearchResultMeta struct {
+// Meta is the meta data tag for each Article Search response
+type Meta struct {
 	Hits   int `json:"hits"`
 	Offset int `json:"offset"`
 	Time   int `json:"time"`
 }
 
-// ArticleSearchResultMedia represents a single multimedia item for a doc
-type ArticleSearchResultMedia struct {
+// Media represents a single multimedia item for a doc
+type Media struct {
 	URL  string `json:"url"`
 	Type string `json:"type"`
 }
 
-// ArticleSearchResultHeadline represents the headline for the result doc
-type ArticleSearchResultHeadline struct {
+// Headline represents the headline for the result doc
+type Headline struct {
 	Main          string `json:"main"`
 	Kicker        string `json:"kicker"`
 	ContentKicker string `json:"content_kicker"`
 	PrintHeadline string `json:"print_headline"`
 }
 
-// ArticleSearchResultDoc is a single document from the Article Search response
-type ArticleSearchResultDoc struct {
-	URL        string                      `json:"web_url"`
-	Snippet    string                      `json:"snippet"`
-	PrintPage  string                      `json:"print_page"`
-	Source     string                      `json:"source"`
-	Multimedia []ArticleSearchResultMedia  `json:"multimedia"`
-	Headline   ArticleSearchResultHeadline `json:"headline"`
+// Keyword represents the keywords of a particular NYT article
+type Keyword struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+// Doc is a single document from the Article Search response
+type Doc struct {
+	URL             string    `json:"web_url"`
+	Snippet         string    `json:"snippet"`
+	PrintPage       string    `json:"print_page"`
+	Source          string    `json:"source"`
+	PublicationDate string    `json:"pub_date"`
+	DocumentType    string    `json:"document_type"`
+	SectionName     string    `json:"section_name"`
+	Multimedia      []Media   `json:"multimedia"`
+	Headline        Headline  `json:"headline"`
+	Keywords        []Keyword `json:"keywords"`
 }
 
 // ArticleSearchResponse is the main data body of the Article Search response
 type ArticleSearchResponse struct {
-	Meta ArticleSearchResultMeta  `json:"meta"`
-	Docs []ArticleSearchResultDoc `json:"docs"`
+	Meta Meta  `json:"meta"`
+	Docs []Doc `json:"docs"`
 }
 
 func main() {
+	queryPtr := flag.String("q", "", "Main query value to pass to the NYT API.")
+	filterQueryPtr := flag.String("fq", "", "Filter query value (Lucene syntax)")
+	flag.Parse()
+
 	var articleSearch Key
 
 	raw, err := ioutil.ReadFile("./config.json")
@@ -97,9 +113,9 @@ func main() {
 	fmt.Println("keyArticleSearch:", articleSearch.Target)
 	fmt.Println("keyArticleSearch:", articleSearch.Value)
 
-	queryArticleSearch := ArticleSearchQuery{
-		Query:       "trump",
-		FilterQuery: "",
+	queryArticleSearch := Query{
+		Query:       *queryPtr,
+		FilterQuery: *filterQueryPtr,
 		BeginDate:   "",
 		EndDate:     "",
 		Sort:        "",
@@ -134,7 +150,7 @@ func main() {
 	}
 }
 
-func makeQueryArticleSearch(key Key, query ArticleSearchQuery) (*http.Response, error) {
+func makeQueryArticleSearch(key Key, query Query) (*http.Response, error) {
 	var buffer bytes.Buffer
 	buffer.WriteString(key.Target)
 	buffer.WriteString("?api-key=")
@@ -148,9 +164,9 @@ func makeQueryArticleSearch(key Key, query ArticleSearchQuery) (*http.Response, 
 	return http.Get(buffer.String())
 }
 
-func getArticles(body []byte) (*ArticleSearchResult, error) {
-	// create pointer to ArticleSearchResult
-	var a = new(ArticleSearchResult)
+func getArticles(body []byte) (*SearchResult, error) {
+	// create pointer to SearchResult
+	var a = new(SearchResult)
 	err := json.Unmarshal(body, &a)
 	if err != nil {
 		fmt.Println("Error parsing articles into struct:", err.Error())
