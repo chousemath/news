@@ -8,10 +8,10 @@
 ```
 [
   {
-    "title": "asldkfjAffff",
-    "description": "asldkjf saldkjf asdlfk js",
-    "value": "23847293874293429384729384729",
-    "target": "https://asdkfjalskdfjlasdkfjlsadkfj"
+    "title": "articleSearch",
+    "description": "With the Article Search API, you can search New York Times articles from Sept. 18, 1851 to today, retrieving headlines, abstracts, lead paragraphs, links to associated multimedia and other article...",
+    "value": "YOUR-API-KEY-GOES-HERE",
+    "target": "https://api.nytimes.com/svc/search/v2/articlesearch.json"
   }
 ]
 ```
