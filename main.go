@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 )
 
 // Key represents my API keys
@@ -88,9 +89,21 @@ type ArticleSearchResponse struct {
 }
 
 func main() {
+	currentTime := time.Now().Local().Format("20060102")
+	fmt.Println("Current Time")
+	fmt.Println(currentTime)
 	queryPtr := flag.String("q", "", "Main query value to pass to the NYT API.")
 	filterQueryPtr := flag.String("fq", "", "Filter query value (Lucene syntax)")
+	beginDatePtr := flag.String("bd", currentTime, "Begin date for news articles")
 	flag.Parse()
+
+	if len(*beginDatePtr) > 0 {
+		if *beginDatePtr == "yesterday" {
+			*beginDatePtr = time.Now().Local().AddDate(0, 0, -1).Format("20060102")
+			fmt.Println("Yesterday's date?")
+			fmt.Println(*beginDatePtr)
+		}
+	}
 
 	var articleSearch Key
 
@@ -116,8 +129,8 @@ func main() {
 	queryArticleSearch := Query{
 		Query:       *queryPtr,
 		FilterQuery: *filterQueryPtr,
-		BeginDate:   "",
-		EndDate:     "",
+		BeginDate:   *beginDatePtr,
+		EndDate:     currentTime,
 		Sort:        "",
 		Fields:      "",
 		Highlight:   false,
@@ -157,9 +170,21 @@ func makeQueryArticleSearch(key Key, query Query) (*http.Response, error) {
 	buffer.WriteString(key.Value)
 
 	if len(query.Query) > 0 {
+		fmt.Println("q has been added")
 		buffer.WriteString("&q=")
 		buffer.WriteString(query.Query)
 	}
+
+	if len(query.FilterQuery) > 0 {
+		fmt.Println("fq has been added")
+		buffer.WriteString("&fq=")
+		buffer.WriteString(query.FilterQuery)
+	}
+
+	// begin_date will go into the query string no matter what
+	buffer.WriteString("&begin_date=")
+	buffer.WriteString(query.BeginDate)
+
 	fmt.Println(buffer.String())
 	return http.Get(buffer.String())
 }
