@@ -169,22 +169,12 @@ func makeQueryArticleSearch(key Key, query Query) (*http.Response, error) {
 	buffer.WriteString("?api-key=")
 	buffer.WriteString(key.Value)
 
-	if len(query.Query) > 0 {
-		fmt.Println("q has been added")
-		buffer.WriteString("&q=")
-		buffer.WriteString(query.Query)
-	}
-
-	if len(query.FilterQuery) > 0 {
-		fmt.Println("fq has been added")
-		buffer.WriteString("&fq=")
-		buffer.WriteString(query.FilterQuery)
-	}
+	buffer.WriteString(addToQuery("q", query.Query))
+	buffer.WriteString(addToQuery("fq", query.FilterQuery))
 
 	// begin_date will go into the query string no matter what
 	buffer.WriteString("&begin_date=")
 	buffer.WriteString(query.BeginDate)
-
 	fmt.Println(buffer.String())
 	return http.Get(buffer.String())
 }
@@ -198,4 +188,11 @@ func getArticles(body []byte) (*SearchResult, error) {
 		os.Exit(1)
 	}
 	return a, err
+}
+
+func addToQuery(key string, value string) string {
+	if len(value) > 0 {
+		return "&" + key + "=" + value
+	}
+	return ""
 }
