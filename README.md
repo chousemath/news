@@ -19,3 +19,4 @@
 ### Golang notes
 
 * In Go, string is a primitive type, it's readonly, every manipulation to it will create a new string
+* In Go there is no such thing as a constant map
