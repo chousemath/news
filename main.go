@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/chousemath/news/utilities"
 )
 
 // Key represents my API keys
@@ -91,7 +93,7 @@ type ArticleSearchResponse struct {
 func main() {
 	currentTime := time.Now().Local().Format("20060102")
 	fmt.Println("Current Time")
-	fmt.Println(currentTime)
+	utilities.ColorPrintln(currentTime, "white")
 	queryPtr := flag.String("q", "", "Main query value to pass to the NYT API.")
 	filterQueryPtr := flag.String("fq", "", "Filter query value (Lucene syntax)")
 	beginDatePtr := flag.String("bd", currentTime, "Begin date for news articles")
@@ -169,8 +171,8 @@ func makeQueryArticleSearch(key Key, query Query) (*http.Response, error) {
 	buffer.WriteString("?api-key=")
 	buffer.WriteString(key.Value)
 
-	buffer.WriteString(addToQuery("q", query.Query))
-	buffer.WriteString(addToQuery("fq", query.FilterQuery))
+	buffer.WriteString(utilities.AddToQuery("q", query.Query))
+	buffer.WriteString(utilities.AddToQuery("fq", query.FilterQuery))
 
 	// begin_date will go into the query string no matter what
 	buffer.WriteString("&begin_date=")
@@ -188,11 +190,4 @@ func getArticles(body []byte) (*SearchResult, error) {
 		os.Exit(1)
 	}
 	return a, err
-}
-
-func addToQuery(key string, value string) string {
-	if len(value) > 0 {
-		return "&" + key + "=" + value
-	}
-	return ""
 }
